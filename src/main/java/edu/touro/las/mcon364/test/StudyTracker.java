@@ -25,7 +25,19 @@ public class StudyTracker {
      * Throw IllegalArgumentException if name is null or blank.
      */
     public boolean addLearner(String name) {
-        throw new UnsupportedOperationException();
+
+        // check if learner already exists
+        if (learnerNames().contains(name)) {
+            return false;
+        }
+        // check if learner is null or blank
+        if (learnerNames() == null || learnerNames().equals("")) {
+            throw new IllegalArgumentException();
+        }
+
+        // add learner
+        scoresByLearner.put(name, new ArrayList<>());
+        return true;
     }
 
     /**
@@ -42,7 +54,17 @@ public class StudyTracker {
      * This operation should be undoable.
      */
     public boolean addScore(String name, int score) {
-        throw new UnsupportedOperationException();
+        // check if learner does not exist
+        if (!learnerNames().contains(name)) {
+            return false;
+        }
+        // check if invalid score
+        if (score < 0 || score > 100) {
+            throw new IllegalArgumentException();
+        }
+        // add score to existing learner
+        scoresByLearner.get(name).add(score);
+        return true;
     }
 
     /**
@@ -54,7 +76,33 @@ public class StudyTracker {
      * - the learner has no scores
      */
     public Optional<Double> averageFor(String name) {
-        throw new UnsupportedOperationException();
+        // look up this student, get optional with their grades or empty
+        var gradesOptional = scoresFor(name);
+
+        // if student doesn't exist, don't calculate average
+        if (gradesOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // student exists, get their actual grade list
+        var grades = gradesOptional.get();
+
+        // if grades don't exist, don't calculate average
+        if (grades.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // add grade
+        int count = 0;
+        int sum = 0;
+        for (var grade : grades) {
+            sum += grade;
+            count++;
+        }
+
+        // calculate average and return
+        double average = (double) sum / count;
+        return Optional.of(average);
     }
 
     /**
@@ -70,7 +118,39 @@ public class StudyTracker {
      * Return Optional.empty() when no average exists.
      */
     public Optional<String> letterBandFor(String name) {
-        throw new UnsupportedOperationException();
+        // get average optional
+        var averageOptional = averageFor(name);
+
+        // check if empty
+        if (averageOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // get actual average
+        double average =  averageOptional.get();
+
+        // convert to tens digit to use in switch statement
+        int grade = (int) average/10;
+
+        // calculate letter grade
+        String letter = switch (grade) {
+            case 10, 9 -> {
+                yield "A";
+            }
+            case 8 -> {
+                yield "B";
+            }
+            case 7 -> {
+                yield "C";
+            }
+            case 6 -> {
+                yield "D";
+            }
+            default -> {
+                yield "F";
+            }
+        };
+        return Optional.of(letter);
     }
 
     /**
@@ -81,8 +161,17 @@ public class StudyTracker {
      * Return false if there is nothing to undo.
      */
     public boolean undoLastChange() {
-        throw new UnsupportedOperationException();
-    }
+        // if stack is empty, return false
+        if (undoStack.isEmpty()) {
+            return false;
+        }
+
+        // pop most recent action
+        UndoStep action = undoStack.pop();
+
+        // execute the undo
+        action.undo();
+        return true;    }
 
 
 }

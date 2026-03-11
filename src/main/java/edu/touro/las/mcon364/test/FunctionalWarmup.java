@@ -2,6 +2,7 @@ package edu.touro.las.mcon364.test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -13,7 +14,10 @@ public class FunctionalWarmup {
      * Return a Supplier that gives the current month number (1-12).
      */
     public static Supplier<Integer> currentMonthSupplier() {
-        throw new UnsupportedOperationException();
+
+        Supplier<Integer> currentMonth = () -> LocalDate.now().getMonthValue();
+        return currentMonth;
+
     }
 
     /**
@@ -22,7 +26,9 @@ public class FunctionalWarmup {
      * has more than 5 characters.
      */
     public static Predicate<String> longerThanFive() {
-        throw new UnsupportedOperationException();
+
+        Predicate<String> isLongerThanFive = str -> str.length() > 5;
+        return isLongerThanFive;
     }
 
     /**
@@ -34,7 +40,10 @@ public class FunctionalWarmup {
      * Prefer chaining smaller predicates.
      */
     public static Predicate<Integer> positiveAndEven() {
-        throw new UnsupportedOperationException();
+        Predicate<Integer> isPositive = str -> str > 0;
+        Predicate<Integer> isEven = str -> str % 2 == 0;
+        Predicate<Integer> combined =  isPositive.and(isEven);
+        return combined;
     }
 
     /**
@@ -48,7 +57,12 @@ public class FunctionalWarmup {
      *
      */
     public static Function<String, Integer> wordCounter() {
-        throw new UnsupportedOperationException();
+        Function<String, String> trim = str -> str.trim();
+        Predicate<String> isBlank = str -> str.length() == 0;
+        Function<String, Integer> split = str -> str.split("\\s").length;
+        Function<String, Integer> countWordsCombined = trim.andThen(split);
+        return countWordsCombined;
+
     }
 
     /**
@@ -63,6 +77,18 @@ public class FunctionalWarmup {
      * ["  math ", "", " java", "  "] -> ["MATH", "JAVA"]
      */
     public static List<String> cleanLabels(List<String> labels) {
-        throw new UnsupportedOperationException();
+        Predicate<String> isBlank = str -> str.length() == 0;
+        Function<String, String> trim = str -> str.trim();
+        Function<String, String> toUpperCase = str -> str.toUpperCase();
+
+        for (String label : labels) {
+            if (isBlank.test(label)) {
+                labels.remove(label);
+            }
+            String trimmed = trim.apply(label);
+            toUpperCase.apply(trimmed);
+
+        }
+        return labels;
     }
 }
